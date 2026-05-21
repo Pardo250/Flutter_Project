@@ -238,9 +238,8 @@ class _LoginScreenState extends State<LoginScreen> {
       child: ElevatedButton(
         onPressed: _isSignInEnabled
             ? () {
-                // TODO: Implementar inicio de sesión
-                print('Email: ${_emailController.text}');
-                print('Password: ${_passwordController.text}');
+                // Navegar a pantalla principal
+                Navigator.of(context).pushReplacementNamed('/main');
               }
             : null,
         style: ElevatedButton.styleFrom(

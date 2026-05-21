@@ -292,11 +292,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: ElevatedButton(
         onPressed: _isRegisterEnabled
             ? () {
-                // TODO: Implementar registro
-                print('Nombre: ${_nombreController.text}');
-                print('Apellido: ${_apellidoController.text}');
-                print('Username: ${_usernameController.text}');
-                print('Correo: ${_correoController.text}');
+                // Navegar a pantalla principal
+                Navigator.of(context).pushReplacementNamed('/main');
               }
             : null,
         style: ElevatedButton.styleFrom(
