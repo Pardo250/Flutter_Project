@@ -94,8 +94,13 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   void _onArticuloClick(Articulo articulo) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Seleccionó: ${articulo.titulo}')),
+    Navigator.pushNamed(
+      context,
+      '/articulo_detalle',
+      arguments: {
+        'articulo': articulo,
+        'reviews': [],
+      },
     );
   }
 

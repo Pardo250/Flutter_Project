@@ -6,7 +6,12 @@ import '../theme/app_theme.dart';
 import '../widgets/profile_image.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback? onLogout;
+
+  const ProfileScreen({
+    super.key,
+    this.onLogout,
+  });
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -148,6 +153,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  void _onSavedArticleClick(Articulo articulo) {
+    Navigator.pushNamed(
+      context,
+      '/articulo_detalle',
+      arguments: {
+        'articulo': articulo,
+        'reviews': uiState.reviews,
+      },
+    );
+  }
+
   void _deleteReview(String reviewId) {
     showDialog(
       context: context,
@@ -211,6 +227,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               },
               onTabSelected: _onTabSelected,
+              onSavedArticleClick: _onSavedArticleClick,
             ),
             // Diálogo de edición
             if (uiState.isEditingReview)
@@ -239,6 +256,7 @@ class ProfileScreenContent extends StatelessWidget {
   final Function(String) onDeleteReview;
   final VoidCallback onFollowListClick;
   final Function(int) onTabSelected;
+  final Function(Articulo) onSavedArticleClick;
 
   const ProfileScreenContent({
     super.key,
@@ -250,6 +268,7 @@ class ProfileScreenContent extends StatelessWidget {
     required this.onDeleteReview,
     required this.onFollowListClick,
     required this.onTabSelected,
+    required this.onSavedArticleClick,
   });
 
   @override
@@ -394,33 +413,36 @@ class ProfileScreenContent extends StatelessWidget {
                   final articulo = state.savedArticles[index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Card(
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      color: colorScheme.surfaceVariant,
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              articulo.titulo,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                    child: GestureDetector(
+                      onTap: () => onSavedArticleClick(articulo),
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        color: colorScheme.surfaceVariant,
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                articulo.titulo,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
-                            ),
-                            Text(
-                              articulo.tipo,
-                              style: TextStyle(
-                                color: colorScheme.primary,
-                                fontSize: 12,
+                              Text(
+                                articulo.tipo,
+                                style: TextStyle(
+                                  color: colorScheme.primary,
+                                  fontSize: 12,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

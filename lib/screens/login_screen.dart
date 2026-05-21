@@ -239,7 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: _isSignInEnabled
             ? () {
                 // Navegar a pantalla principal
-                Navigator.of(context).pushReplacementNamed('/main');
+                Navigator.pushReplacementNamed(context, '/main');
               }
             : null,
         style: ElevatedButton.styleFrom(
@@ -350,10 +350,7 @@ class _LoginScreenState extends State<LoginScreen> {
       height: 56,
       child: OutlinedButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const RegisterScreen()),
-          );
+          Navigator.pushReplacementNamed(context, '/register');
         },
         style: OutlinedButton.styleFrom(
           side: const BorderSide(

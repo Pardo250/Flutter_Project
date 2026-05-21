@@ -4,6 +4,7 @@ import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/feed_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/articulo_detalle_screen.dart';
 import 'theme/app_theme.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _logout() {
-    Navigator.of(context).pushReplacementNamed('/login');
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
@@ -87,6 +88,18 @@ class MainApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/main': (context) => const MainNavigationScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/articulo_detalle') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => ArticuloDetalleScreen(
+              articulo: args['articulo'],
+              reviews: args['reviews'] ?? [],
+            ),
+          );
+        }
+        return null;
       },
     );
   }

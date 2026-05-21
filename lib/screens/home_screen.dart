@@ -4,7 +4,14 @@ import '../models/review.dart';
 import '../theme/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final VoidCallback? onProfileTap;
+  final VoidCallback? onLogout;
+
+  const HomeScreen({
+    super.key,
+    this.onProfileTap,
+    this.onLogout,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -81,9 +88,13 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       selectedIndex = index;
     });
-    // Aquí navegarías a los detalles del artículo
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Seleccionó: ${articulos[index].titulo}')),
+    Navigator.pushNamed(
+      context,
+      '/articulo_detalle',
+      arguments: {
+        'articulo': articulos[index],
+        'reviews': reviews,
+      },
     );
   }
 

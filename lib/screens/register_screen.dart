@@ -37,8 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _usernameController.text.isNotEmpty &&
           _correoController.text.isNotEmpty &&
           _passwordController.text.isNotEmpty &&
-          _confirmPasswordController.text.isNotEmpty &&
-          _passwordController.text == _confirmPasswordController.text;
+          _confirmPasswordController.text.isNotEmpty;
     });
   }
 
@@ -292,8 +291,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: ElevatedButton(
         onPressed: _isRegisterEnabled
             ? () {
+                // Validar que las contraseñas coincidan
+                if (_passwordController.text != _confirmPasswordController.text) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Las contraseñas no coinciden'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
                 // Navegar a pantalla principal
-                Navigator.of(context).pushReplacementNamed('/main');
+                Navigator.pushReplacementNamed(context, '/main');
               }
             : null,
         style: ElevatedButton.styleFrom(
@@ -326,7 +335,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       height: 56,
       child: OutlinedButton(
         onPressed: () {
-          Navigator.pop(context);
+          Navigator.pushReplacementNamed(context, '/login');
         },
         style: OutlinedButton.styleFrom(
           side: const BorderSide(
