@@ -5,6 +5,7 @@ import 'screens/home_screen.dart';
 import 'screens/feed_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/articulo_detalle_screen.dart';
+import 'screens/notifications_screen.dart';
 import 'theme/app_theme.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -88,6 +89,7 @@ class MainApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/main': (context) => const MainNavigationScreen(),
+        '/notifications': (context) => const NotificationsScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/articulo_detalle') {

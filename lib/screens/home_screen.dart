@@ -117,9 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SliverToBoxAdapter(
               child: HomeHeader(
                 onNotifications: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Notificaciones')),
-                  );
+                  Navigator.pushNamed(context, '/notifications');
                 },
               ),
             ),
