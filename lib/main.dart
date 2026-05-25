@@ -6,6 +6,7 @@ import 'screens/feed_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/articulo_detalle_screen.dart';
 import 'theme/app_theme.dart';
+import 'models/review.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -15,55 +16,93 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _currentIndex = 0;
-
-  void _goToProfile() {
-    setState(() => _currentIndex = 2);
-  }
-
-  void _logout() {
-    Navigator.pushReplacementNamed(context, '/login');
-  }
+  int _currentIndex = 1;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      HomeScreen(
-        onProfileTap: _goToProfile,
-        onLogout: _logout,
-      ),
-      const FeedScreen(),
-      ProfileScreen(
-        onLogout: _logout,
-      ),
+      const FeedScreen(),    // 0: Explore (Feed)
+      const HomeScreen(),    // 1: Home
+      const ProfileScreen(), // 2: Profile
     ];
 
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: screens,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        selectedItemColor: const Color(0xFF90C965),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Home',
+      backgroundColor: CondorAppTheme.darkBg,
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: _currentIndex,
+            children: screens,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore_rounded),
-            label: 'Explorar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_rounded),
-            label: 'Perfil',
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 30,
+            child: _buildFloatingNavBar(),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingNavBar() {
+    return Container(
+      height: 70,
+      decoration: BoxDecoration(
+        color: const Color(0xFF242424),
+        borderRadius: BorderRadius.circular(35),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildNavItem(0, Icons.location_on, 'Explore'),
+          _buildNavItem(1, Icons.calendar_today, 'Home', isActiveFilled: true),
+          _buildNavItem(2, Icons.person_outline, 'Profile'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, String label, {bool isActiveFilled = false}) {
+    final isSelected = _currentIndex == index;
+    
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: isSelected && isActiveFilled
+            ? BoxDecoration(
+                color: CondorAppTheme.filterIconBg,
+                borderRadius: BorderRadius.circular(20),
+              )
+            : null,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: Colors.white,
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontSize: 10,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -95,7 +134,7 @@ class MainApp extends StatelessWidget {
           return MaterialPageRoute(
             builder: (context) => ArticuloDetalleScreen(
               articulo: args['articulo'],
-              reviews: args['reviews'] ?? [],
+              reviews: args['reviews'] != null ? List<Review>.from(args['reviews']) : <Review>[],
             ),
           );
         }

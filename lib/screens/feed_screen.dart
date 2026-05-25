@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/articulo.dart';
 import '../theme/app_theme.dart';
 
 class FeedScreen extends StatefulWidget {
@@ -10,534 +9,278 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  String searchQuery = '';
-  int selectedCategoryIndex = 0;
-  bool isLoading = false;
-  String? errorMessage;
+  int _selectedCategoryIndex = 0;
 
-  late List<Articulo> articulos;
-  late List<String> categories;
+  final List<String> _categories = ['Paisaje', 'Playas', 'Cultural', 'Hoteles'];
 
-  // Categorías disponibles
-  static const List<String> _categoryNames = [
-    'Paisajes',
-    'Playas',
-    'Cultural',
-    'Hoteles',
+  final List<Map<String, dynamic>> _destinations = [
+    {
+      'name': 'Cartagena',
+      'img': 'assets/images/cartagena.png',
+      'rating': 5,
+    },
+    {
+      'name': 'Valle Cocora...',
+      'img': 'assets/images/cocora.png',
+      'rating': 5,
+    },
+    {
+      'name': 'Santa Marta',
+      'img': 'assets/images/santa_marta.png',
+      'rating': 4,
+    },
+    {
+      'name': 'Medellín',
+      'img': 'assets/images/medellin.png',
+      'rating': 4,
+    },
+    {
+      'name': 'Tayrona',
+      'img': 'assets/images/tayrona.png',
+      'rating': 5,
+    },
+    {
+      'name': 'Bogotá',
+      'img': 'assets/images/bogota.png',
+      'rating': 4,
+    },
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeData();
-  }
-
-  void _initializeData() {
-    categories = _categoryNames;
-
-    articulos = [
-      Articulo(
-        id: '1',
-        titulo: 'Valle del Cocora',
-        descripcion: 'Hermoso paisaje de palmeras',
-        tipo: 'paisaje',
-        imagenUrl: '',
-      ),
-      Articulo(
-        id: '2',
-        titulo: 'Playa Blanca',
-        descripcion: 'Arena blanca y agua turquesa',
-        tipo: 'playa',
-        imagenUrl: '',
-      ),
-      Articulo(
-        id: '3',
-        titulo: 'Centro Histórico',
-        descripcion: 'Arquitectura colonial colorida',
-        tipo: 'cultural',
-        imagenUrl: '',
-      ),
-      Articulo(
-        id: '4',
-        titulo: 'Resort de Lujo',
-        descripcion: 'Hotel 5 estrellas frente al mar',
-        tipo: 'hotel',
-        imagenUrl: '',
-      ),
-      Articulo(
-        id: '5',
-        titulo: 'Montañas Nevadas',
-        descripcion: 'Picos blancos y nieve perpetua',
-        tipo: 'paisaje',
-        imagenUrl: '',
-      ),
-      Articulo(
-        id: '6',
-        titulo: 'Catedral Metropolitana',
-        descripcion: 'Monumento arquitectónico religioso',
-        tipo: 'cultural',
-        imagenUrl: '',
-      ),
-    ];
-  }
-
-  void _onCategorySelected(int index) {
-    setState(() {
-      selectedCategoryIndex = index;
-    });
-  }
-
-  void _onSearchQueryChange(String query) {
-    setState(() {
-      searchQuery = query;
-    });
-  }
-
-  void _onArticuloClick(Articulo articulo) {
-    Navigator.pushNamed(
-      context,
-      '/articulo_detalle',
-      arguments: {
-        'articulo': articulo,
-        'reviews': [],
-      },
-    );
-  }
-
-  void _onMapClick() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ir a pantalla de mapa')),
-    );
-  }
-
-  List<Articulo> get filteredArticulos {
-    var filtered = articulos;
-
-    // Filtrar por categoría
-    if (selectedCategoryIndex >= 0 && selectedCategoryIndex < categories.length) {
-      final category = categories[selectedCategoryIndex].toLowerCase();
-      filtered = filtered
-          .where((a) => a.tipo.toLowerCase().contains(category[0]))
-          .toList();
-    }
-
-    // Filtrar por búsqueda
-    if (searchQuery.isNotEmpty) {
-      filtered = filtered
-          .where((a) =>
-              a.titulo.toLowerCase().contains(searchQuery.toLowerCase()) ||
-              a.descripcion.toLowerCase().contains(searchQuery.toLowerCase()))
-          .toList();
-    }
-
-    return filtered;
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: CondorAppTheme.darkBg,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 40),
-                // Search Bar
-                FeedSearchBar(
-                  query: searchQuery,
-                  onQueryChange: _onSearchQueryChange,
-                ),
-                const SizedBox(height: 20),
-                // Map Card
-                MapCard(onClick: _onMapClick),
-                const SizedBox(height: 20),
-                // Category Chips
-                CategoryChips(
-                  selectedIndex: selectedCategoryIndex,
-                  onSelected: _onCategorySelected,
-                ),
-                const SizedBox(height: 16),
-                // Title
-                Text(
-                  'Recomendado para ti',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Loading
-                if (isLoading)
-                  Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                // Error
-                if (errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      errorMessage!,
-                      style: TextStyle(color: Colors.red[700]),
-                    ),
-                  ),
-                // Grid de artículos
-                ArticuloGrid(
-                  articulos: filteredArticulos,
-                  onArticuloClick: _onArticuloClick,
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Barra de búsqueda funcional
-class FeedSearchBar extends StatelessWidget {
-  final String query;
-  final Function(String) onQueryChange;
-
-  const FeedSearchBar({
-    super.key,
-    required this.query,
-    required this.onQueryChange,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return TextField(
-      value: query,
-      onChanged: onQueryChange,
-      decoration: InputDecoration(
-        hintText: 'Buscar artículos...',
-        hintStyle: TextStyle(
-          color: colorScheme.outline.withOpacity(0.6),
-        ),
-        prefixIcon: Icon(
-          Icons.search,
-          color: colorScheme.outline,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-          borderSide: BorderSide(color: colorScheme.surfaceVariant),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-          borderSide: BorderSide(color: colorScheme.surfaceVariant),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-          borderSide: BorderSide(color: colorScheme.primary, width: 2),
-        ),
-        filled: true,
-        fillColor: colorScheme.surface,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      ),
-    );
-  }
-}
-
-/// Tarjeta con imagen del mapa. Al hacer click navega a la pantalla del mapa
-class MapCard extends StatelessWidget {
-  final VoidCallback onClick;
-
-  const MapCard({
-    super.key,
-    required this.onClick,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onClick,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        elevation: 8,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Stack(
-            children: [
-              // Map image fallback
-              Container(
-                width: double.infinity,
-                height: 180,
-                color: Colors.grey[300],
-                child: const Icon(
-                  Icons.map,
-                  size: 80,
-                  color: Colors.grey,
-                ),
-              ),
-              // Overlay with text
-              Positioned(
-                bottom: 12,
-                left: 12,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surface
-                        .withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  child: Text(
-                    '📍 Ver reviews en el mapa',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Chips de categorías seleccionables
-class CategoryChips extends StatelessWidget {
-  final int selectedIndex;
-  final Function(int) onSelected;
-
-  const CategoryChips({
-    super.key,
-    required this.selectedIndex,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final categories = [
-      'Paisajes',
-      'Playas',
-      'Cultural',
-      'Hoteles',
-    ];
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: List.generate(
-          categories.length,
-          (index) => Padding(
-            padding: EdgeInsets.only(right: 10, left: index == 0 ? 0 : 0),
-            child: FilterChipItem(
-              label: categories[index],
-              selected: selectedIndex == index,
-              onClick: () => onSelected(index),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Chip individual de filtro de categoría
-class FilterChipItem extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onClick;
-
-  const FilterChipItem({
-    super.key,
-    required this.label,
-    required this.selected,
-    required this.onClick,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onClick,
-      child: Container(
-        decoration: BoxDecoration(
-          color: selected ? colorScheme.primary : colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: selected
-                ? colorScheme.onPrimary
-                : colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Grid de artículos recomendados del backend
-class ArticuloGrid extends StatelessWidget {
-  final List<Articulo> articulos;
-  final Function(Articulo) onArticuloClick;
-
-  const ArticuloGrid({
-    super.key,
-    required this.articulos,
-    required this.onArticuloClick,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (articulos.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32),
-        child: Center(
-          child: Text(
-            'No se encontraron artículos',
-            style: TextStyle(color: Colors.grey[600]),
-          ),
-        ),
-      );
-    }
-
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: articulos.length,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        final articulo = articulos[index];
-        return ArticuloGridCard(
-          articulo: articulo,
-          onClick: () => onArticuloClick(articulo),
-        );
-      },
-    );
-  }
-}
-
-/// Tarjeta individual de artículo en el grid con imagen, título y tipo
-class ArticuloGridCard extends StatelessWidget {
-  final Articulo articulo;
-  final VoidCallback onClick;
-
-  const ArticuloGridCard({
-    super.key,
-    required this.articulo,
-    required this.onClick,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onClick,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: colorScheme.surface,
-        elevation: 4,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image or fallback
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
-                ),
-                child: articulo.imagenUrl.isNotEmpty
-                    ? Image.network(
-                        articulo.imagenUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return _buildImageFallback(colorScheme, articulo);
-                        },
-                      )
-                    : _buildImageFallback(colorScheme, articulo),
-              ),
-            ),
-            // Content
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
-                  Text(
-                    articulo.titulo,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Type badge
-                  Container(
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    child: Text(
-                      articulo.tipo,
-                      style: TextStyle(
-                        color: colorScheme.primary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(child: _buildSearchBar()),
+            SliverToBoxAdapter(child: const SizedBox(height: 16)),
+            SliverToBoxAdapter(child: _buildMapCard()),
+            SliverToBoxAdapter(child: const SizedBox(height: 24)),
+            SliverToBoxAdapter(child: _buildCategoryFilter()),
+            SliverToBoxAdapter(child: const SizedBox(height: 24)),
+            SliverToBoxAdapter(child: _buildRecommendedTitle()),
+            SliverToBoxAdapter(child: const SizedBox(height: 16)),
+            SliverToBoxAdapter(child: _buildDestinationGrid()),
+            SliverToBoxAdapter(child: const SizedBox(height: 110)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildImageFallback(ColorScheme colorScheme, Articulo articulo) {
-    return Container(
-      color: colorScheme.primary.withOpacity(0.1),
-      child: Center(
-        child: Text(
-          articulo.tipo.isNotEmpty ? articulo.tipo[0].toUpperCase() : '?',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: colorScheme.primary,
-            fontSize: 40,
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2C2C2C),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Row(
+          children: const [
+            Icon(Icons.search, color: Color(0xFF888888), size: 22),
+            Spacer(),
+            Icon(Icons.menu, color: Color(0xFF888888), size: 22),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMapCard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: SizedBox(
+          height: 190,
+          child: Image.network(
+            'https://maps.googleapis.com/maps/api/staticmap?center=Bogota,Colombia&zoom=12&size=600x400&key=DEMO_KEY',
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              // If static maps API key isn't available, show a styled placeholder
+              return Container(
+                color: const Color(0xFF2C3E2D),
+                child: Stack(
+                  children: [
+                    // Grid lines to simulate map
+                    CustomPaint(
+                      painter: _MapPainter(),
+                      child: Container(),
+                    ),
+                    // Central pin
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.location_pin, color: Colors.red, size: 40),
+                          SizedBox(height: 4),
+                          Text(
+                            'Colombia',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
     );
   }
+
+  Widget _buildCategoryFilter() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: List.generate(_categories.length, (index) {
+            final isSelected = _selectedCategoryIndex == index;
+            return Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedCategoryIndex = index),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected ? CondorAppTheme.filterIconBg : const Color(0xFF2C2C2C),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Text(
+                    _categories[index],
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : const Color(0xFF888888),
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecommendedTitle() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: Text(
+        'Recomendado para ti',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 22,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDestinationGrid() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: _destinations.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.8,
+        ),
+        itemBuilder: (context, index) {
+          final dest = _destinations[index];
+          return _buildDestinationItem(dest);
+        },
+      ),
+    );
+  }
+
+  Widget _buildDestinationItem(Map<String, dynamic> dest) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Image.asset(
+              dest['img'] as String,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              errorBuilder: (context, error, stack) => Container(
+                color: const Color(0xFF2C2C2C),
+                child: const Icon(Icons.image_not_supported, color: Color(0xFF555555)),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          dest['name'] as String,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(5, (i) {
+            return Icon(
+              Icons.star,
+              size: 12,
+              color: i < (dest['rating'] as int)
+                  ? CondorAppTheme.accentGold
+                  : const Color(0xFF555555),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+// Custom painter to render a simple map grid in dark mode
+class _MapPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF3A4A3A)
+      ..strokeWidth = 0.8;
+
+    // Horizontal lines
+    for (double y = 0; y < size.height; y += 30) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+    // Vertical lines
+    for (double x = 0; x < size.width; x += 40) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+
+    // Some "roads" (thicker lines)
+    final roadPaint = Paint()
+      ..color = const Color(0xFF4A5E4A)
+      ..strokeWidth = 3;
+    canvas.drawLine(Offset(0, size.height * 0.4), Offset(size.width, size.height * 0.4), roadPaint);
+    canvas.drawLine(Offset(size.width * 0.35, 0), Offset(size.width * 0.35, size.height), roadPaint);
+    canvas.drawLine(Offset(size.width * 0.65, 0), Offset(size.width * 0.65, size.height), roadPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

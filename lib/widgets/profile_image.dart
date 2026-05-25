@@ -44,7 +44,7 @@ class ProfileImage extends StatelessWidget {
   Widget _buildFallback(BuildContext context, double sizeValue) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      color: colorScheme.primary.withOpacity(0.1),
+      color: colorScheme.primary.withValues(alpha: 0.1),
       child: Center(
         child: Icon(
           Icons.person,
