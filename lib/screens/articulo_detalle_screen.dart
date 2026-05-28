@@ -116,13 +116,24 @@ class _ArticuloDetalleScreenState extends State<ArticuloDetalleScreen> {
         Container(
           height: 300,
           width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.withValues(alpha: 0.5), Colors.green.withValues(alpha: 0.5)],
-            ),
-          ),
-          child: const Center(
-            child: Text('📸', style: TextStyle(fontSize: 80)),
+          color: const Color(0xFF2C2C2C),
+          child: Image.asset(
+            widget.articulo.imagenUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stack) {
+              return Container(
+                height: 300,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.withValues(alpha: 0.5), Colors.green.withValues(alpha: 0.5)],
+                  ),
+                ),
+                child: const Center(
+                  child: Text('📸', style: TextStyle(fontSize: 80)),
+                ),
+              );
+            },
           ),
         ),
         Positioned(
